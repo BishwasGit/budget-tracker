@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\Balance;
 use App\Models\Transaction;
 use App\Models\Person;
+use App\Models\Expense;
 
 class BalanceController extends Controller
 {
@@ -25,7 +26,12 @@ class BalanceController extends Controller
             ->limit(10)
             ->get();
 
-        return view('balance.index', compact('balance', 'recentTransactions'));
+        $totalExpenses = Expense::sum('amount');
+        $recentExpenses = Expense::orderBy('created_at', 'desc')
+            ->limit(5)
+            ->get();
+
+        return view('balance.index', compact('balance', 'recentTransactions', 'totalExpenses', 'recentExpenses'));
     }
 
     public function addBalance(Request $request)
