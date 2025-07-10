@@ -3,13 +3,14 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use App\Models\Person;
 
 class PersonController extends Controller
 {
     public function index()
     {
-        $people = Person::all();
+        $people = Person::where('user_id', Auth::id())->get();
         return view('people.index', compact('people'));
     }
 
@@ -27,18 +28,30 @@ class PersonController extends Controller
             'address' => 'nullable|string'
         ]);
 
-        Person::create($request->all());
+        $person = new Person($request->all());
+        $person->user_id = Auth::id();
+        $person->save();
 
         return redirect()->route('people.index')->with('success', 'Person created successfully!');
     }
 
     public function edit(Person $person)
     {
+        // Ensure user can only edit their own people
+        if ($person->user_id !== Auth::id()) {
+            abort(403, 'Unauthorized action.');
+        }
+
         return view('people.edit', compact('person'));
     }
 
     public function update(Request $request, Person $person)
     {
+        // Ensure user can only update their own people
+        if ($person->user_id !== Auth::id()) {
+            abort(403, 'Unauthorized action.');
+        }
+
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'nullable|email|unique:people,email,' . $person->id,
@@ -53,6 +66,11 @@ class PersonController extends Controller
 
     public function destroy(Person $person)
     {
+        // Ensure user can only delete their own people
+        if ($person->user_id !== Auth::id()) {
+            abort(403, 'Unauthorized action.');
+        }
+
         $person->delete();
         return redirect()->route('people.index')->with('success', 'Person deleted successfully!');
     }

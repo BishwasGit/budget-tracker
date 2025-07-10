@@ -2,6 +2,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use App\Models\Goal;
 use App\Models\Balance;
 
@@ -9,10 +10,10 @@ class GoalController extends Controller
 {
     public function index()
     {
-        $goals = Goal::orderBy('created_at', 'desc')->get();
-        $totalGoalsAmount = Goal::sum('target_amount');
-        $totalSavedAmount = Goal::sum('current_amount');
-        $balance = Balance::first();
+        $goals = Goal::where('user_id', Auth::id())->orderBy('created_at', 'desc')->get();
+        $totalGoalsAmount = Goal::where('user_id', Auth::id())->sum('target_amount');
+        $totalSavedAmount = Goal::where('user_id', Auth::id())->sum('current_amount');
+        $balance = Balance::where('user_id', Auth::id())->first();
 
         return view('goals.index', compact('goals', 'totalGoalsAmount', 'totalSavedAmount', 'balance'));
     }
@@ -31,7 +32,9 @@ class GoalController extends Controller
             'deadline' => 'nullable|date|after:today'
         ]);
 
-        Goal::create($request->all());
+        $goal = new Goal($request->all());
+        $goal->user_id = Auth::id();
+        $goal->save();
 
         return redirect()->route('goals.index')
             ->with('success', 'Goal created successfully!');
@@ -39,11 +42,21 @@ class GoalController extends Controller
 
     public function edit(Goal $goal)
     {
+        // Ensure user can only edit their own goals
+        if ($goal->user_id !== Auth::id()) {
+            abort(403, 'Unauthorized action.');
+        }
+
         return view('goals.edit', compact('goal'));
     }
 
     public function update(Request $request, Goal $goal)
     {
+        // Ensure user can only update their own goals
+        if ($goal->user_id !== Auth::id()) {
+            abort(403, 'Unauthorized action.');
+        }
+
         $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
@@ -60,6 +73,11 @@ class GoalController extends Controller
 
     public function destroy(Goal $goal)
     {
+        // Ensure user can only delete their own goals
+        if ($goal->user_id !== Auth::id()) {
+            abort(403, 'Unauthorized action.');
+        }
+
         // If goal has saved money, return it to balance
         if ($goal->current_amount > 0) {
             $this->updateBalance($goal->current_amount);
@@ -73,12 +91,17 @@ class GoalController extends Controller
 
     public function allocate(Request $request, Goal $goal)
     {
+        // Ensure user can only allocate to their own goals
+        if ($goal->user_id !== Auth::id()) {
+            abort(403, 'Unauthorized action.');
+        }
+
         $request->validate([
             'amount' => 'required|numeric|min:0.01'
         ]);
 
-        $balance = Balance::first();
-        $amount = $request->amount;
+        $balance = Balance::where('user_id', Auth::id())->first();
+        $amount = (float) $request->amount;
 
         // Check if user has enough balance
         if (!$balance || $balance->current_balance < $amount) {
@@ -94,7 +117,7 @@ class GoalController extends Controller
         }
 
         // Update goal and balance
-        $goal->current_amount += $amount;
+        $goal->current_amount = $goal->current_amount + $amount;
 
         // Mark as completed if target reached
         if ($goal->current_amount >= $goal->target_amount) {
@@ -112,11 +135,16 @@ class GoalController extends Controller
 
     public function withdraw(Request $request, Goal $goal)
     {
+        // Ensure user can only withdraw from their own goals
+        if ($goal->user_id !== Auth::id()) {
+            abort(403, 'Unauthorized action.');
+        }
+
         $request->validate([
             'amount' => 'required|numeric|min:0.01'
         ]);
 
-        $amount = $request->amount;
+        $amount = (float) $request->amount;
 
         // Check if goal has enough saved amount
         if ($goal->current_amount < $amount) {
@@ -125,7 +153,7 @@ class GoalController extends Controller
         }
 
         // Update goal
-        $goal->current_amount -= $amount;
+        $goal->current_amount = $goal->current_amount - $amount;
         $goal->status = 'active'; // Reactivate if was completed
         $goal->save();
 
@@ -138,9 +166,10 @@ class GoalController extends Controller
 
     private function updateBalance($amount)
     {
-        $balance = Balance::first();
+        $balance = Balance::where('user_id', Auth::id())->first();
         if (!$balance) {
             $balance = Balance::create([
+                'user_id' => Auth::id(),
                 'current_balance' => 0,
                 'total_to_pay' => 0,
                 'total_to_receive' => 0

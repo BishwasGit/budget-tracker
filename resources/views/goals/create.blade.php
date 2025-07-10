@@ -44,7 +44,7 @@
                             Target Amount <span class="text-red-500">*</span>
                         </label>
                         <div class="relative">
-                            <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-500">$</span>
+                            {{-- <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-500">$</span> --}}
                             <input type="number" id="target_amount" name="target_amount" step="0.01" min="0.01" value="{{ old('target_amount') }}"
                                    class="w-full pl-8 pr-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                                    placeholder="50000.00"
@@ -65,7 +65,7 @@
                     </div>
                 </div>
 
-                <div class="bg-blue-50 border border-blue-200 rounded-md p-4">
+                <div class="bg-blue-50 border border-blue-200 rounded-md p-4" style="margin-top: 15px;">
                     <div class="flex">
                         <div class="flex-shrink-0">
                             <svg class="h-5 w-5 text-blue-400" fill="currentColor" viewBox="0 0 20 20">
@@ -86,11 +86,11 @@
                     </div>
                 </div>
 
-                <div class="flex justify-between items-center pt-6 border-t border-gray-200">
+                <div class="flex justify-between items-center pt-6 border-t border-gray-200" style="margin-top: 24px;">
                     <a href="{{ route('goals.index') }}" class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
                         Cancel
                     </a>
-                    <button type="submit" class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700">
+                    <button type="submit" class="inline-block bg-blue-500 text-white px-6 py-2 rounded shadow hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2 transition">
                         Create Goal
                     </button>
                 </div>

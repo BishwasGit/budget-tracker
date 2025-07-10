@@ -15,7 +15,8 @@ class Transaction extends Model
         'status',
         'from_person_id',
         'to_person_id',
-        'parent_transaction_id'
+        'parent_transaction_id',
+        'user_id'
     ];
 
     protected $casts = [
@@ -42,5 +43,10 @@ class Transaction extends Model
     public function childTransactions()
     {
         return $this->hasMany(Transaction::class, 'parent_transaction_id');
+    }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
     }
 }

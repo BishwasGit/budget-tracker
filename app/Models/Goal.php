@@ -15,7 +15,8 @@ class Goal extends Model
         'target_amount',
         'current_amount',
         'deadline',
-        'status'
+        'status',
+        'user_id'
     ];
 
     protected $casts = [
@@ -38,5 +39,10 @@ class Goal extends Model
     public function getIsCompletedAttribute()
     {
         return $this->current_amount >= $this->target_amount;
+    }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
     }
 }

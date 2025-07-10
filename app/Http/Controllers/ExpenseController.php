@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use App\Models\Expense;
 use App\Models\Balance;
 
@@ -10,8 +11,10 @@ class ExpenseController extends Controller
 {
     public function index()
     {
-        $expenses = Expense::orderBy('date', 'desc')->paginate(10);
-        $totalExpenses = Expense::sum('amount');
+        $expenses = Expense::where('user_id', Auth::id())
+            ->orderBy('date', 'desc')
+            ->paginate(10);
+        $totalExpenses = Expense::where('user_id', Auth::id())->sum('amount');
 
         return view('expenses.index', compact('expenses', 'totalExpenses'));
     }
@@ -31,7 +34,9 @@ class ExpenseController extends Controller
             'date' => 'required|date'
         ]);
 
-        $expense = Expense::create($request->all());
+        $expense = new Expense($request->all());
+        $expense->user_id = Auth::id();
+        $expense->save();
 
         // Update balance - subtract expense from current balance
         $this->updateBalance(-$expense->amount);
@@ -42,11 +47,21 @@ class ExpenseController extends Controller
 
     public function edit(Expense $expense)
     {
+        // Ensure user can only edit their own expenses
+        if ($expense->user_id !== Auth::id()) {
+            abort(403, 'Unauthorized action.');
+        }
+
         return view('expenses.edit', compact('expense'));
     }
 
     public function update(Request $request, Expense $expense)
     {
+        // Ensure user can only update their own expenses
+        if ($expense->user_id !== Auth::id()) {
+            abort(403, 'Unauthorized action.');
+        }
+
         $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
@@ -67,6 +82,11 @@ class ExpenseController extends Controller
 
     public function destroy(Expense $expense)
     {
+        // Ensure user can only delete their own expenses
+        if ($expense->user_id !== Auth::id()) {
+            abort(403, 'Unauthorized action.');
+        }
+
         $amount = $expense->amount;
         $expense->delete();
 
@@ -79,9 +99,10 @@ class ExpenseController extends Controller
 
     private function updateBalance($amount)
     {
-        $balance = Balance::first();
+        $balance = Balance::where('user_id', Auth::id())->first();
         if (!$balance) {
             $balance = Balance::create([
+                'user_id' => Auth::id(),
                 'current_balance' => 0,
                 'total_to_pay' => 0,
                 'total_to_receive' => 0

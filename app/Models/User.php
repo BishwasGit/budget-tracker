@@ -21,6 +21,7 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'user_id',
     ];
 
     /**
@@ -44,5 +45,45 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    /**
+     * Get the people associated with the user.
+     */
+    public function people()
+    {
+        return $this->hasMany(Person::class);
+    }
+
+    /**
+     * Get the transactions associated with the user.
+     */
+    public function transactions()
+    {
+        return $this->hasMany(Transaction::class);
+    }
+
+    /**
+     * Get the balance associated with the user.
+     */
+    public function balance()
+    {
+        return $this->hasOne(Balance::class);
+    }
+
+    /**
+     * Get the expenses associated with the user.
+     */
+    public function expenses()
+    {
+        return $this->hasMany(Expense::class);
+    }
+
+    /**
+     * Get the goals associated with the user.
+     */
+    public function goals()
+    {
+        return $this->hasMany(Goal::class);
     }
 }

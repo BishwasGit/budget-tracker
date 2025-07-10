@@ -7,7 +7,7 @@
     <h1 class="text-3xl font-bold text-gray-900 mb-6">Dashboard</h1>
     <div class="flex flex-row gap-6 mb-8">
         <div class="flex-1 bg-white rounded-lg shadow p-6">
-            <h2 class="text-lg font-medium text-gray-900 mb-2">Current Balance</h2>
+            <h2 class="text-lg font-medium text-gray-900 mb-2">Balance You can Use</h2>
             <p class="text-3xl font-bold text-blue-600">${{ number_format($balance->current_balance, 2) }}</p>
         </div>
         <div class="flex-1 bg-white rounded-lg shadow p-6">
@@ -16,12 +16,16 @@
         </div>
         <div class="flex-1 bg-white rounded-lg shadow p-6">
             <h2 class="text-lg font-medium text-gray-900 mb-2">Total to Receive</h2>
-            <p class="text-3xl font-bold text-green-600">${{ number_format($balance->total_to_receive, 2) }}</p>
+            <p class="text-3xl font-bold text-yellow-600">${{ number_format($balance->total_to_receive, 2) }}</p>
         </div>
         <div class="flex-1 bg-white rounded-lg shadow p-6">
             <h2 class="text-lg font-medium text-gray-900 mb-2">Total Expenses</h2>
             <p class="text-3xl font-bold text-orange-600">${{ number_format($totalExpenses, 2) }}</p>
         </div>
+        {{-- <div class="flex-1 bg-white rounded-lg shadow p-6">
+            <h2 class="text-lg font-medium text-gray-900 mb-2">Total Reserved</h2>
+            <p class="text-3xl font-bold text-green-600">${{ number_format($reservedAmount, 2) }}</p>
+        </div> --}}
     </div>
 
     <div class="bg-white rounded-lg shadow p-6 mb-8">
@@ -61,7 +65,7 @@
                         <div class="text-right">
                             <p class="font-medium text-gray-900">${{ number_format($transaction->amount, 2) }}</p>
                             <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium
-                                @if($transaction->status == 'paid') bg-green-100 text-green-800
+                                @if($transaction->status == 'completed') bg-green-100 text-green-800
                                 @elseif($transaction->status == 'partial') bg-yellow-100 text-yellow-800
                                 @else bg-red-100 text-red-800 @endif">
                                 {{ ucfirst($transaction->status) }}

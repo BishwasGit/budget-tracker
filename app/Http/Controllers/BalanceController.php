@@ -3,18 +3,21 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use App\Models\Balance;
 use App\Models\Transaction;
 use App\Models\Person;
 use App\Models\Expense;
+use App\Models\Goal;
 
 class BalanceController extends Controller
 {
     public function index()
     {
-        $balance = Balance::first();
+        $balance = Balance::where('user_id', Auth::id())->first();
         if (!$balance) {
             $balance = Balance::create([
+                'user_id' => Auth::id(),
                 'current_balance' => 0,
                 'total_to_pay' => 0,
                 'total_to_receive' => 0
@@ -22,16 +25,22 @@ class BalanceController extends Controller
         }
 
         $recentTransactions = Transaction::with(['fromPerson', 'toPerson'])
+            ->where('user_id', Auth::id())
             ->orderBy('created_at', 'desc')
             ->limit(10)
             ->get();
 
-        $totalExpenses = Expense::sum('amount');
-        $recentExpenses = Expense::orderBy('created_at', 'desc')
+        $totalExpenses = Expense::where('user_id', Auth::id())->sum('amount');
+        $recentExpenses = Expense::where('user_id', Auth::id())
+            ->orderBy('created_at', 'desc')
             ->limit(5)
             ->get();
 
-        return view('balance.index', compact('balance', 'recentTransactions', 'totalExpenses', 'recentExpenses'));
+        $reservedAmount = Goal::where('user_id', Auth::id())
+            ->where('status', 'active')
+            ->sum('current_amount');
+
+        return view('balance.index', compact('balance', 'recentTransactions', 'totalExpenses', 'recentExpenses','reservedAmount'));
     }
 
     public function addBalance(Request $request)
@@ -40,9 +49,10 @@ class BalanceController extends Controller
             'amount' => 'required|numeric|min:0'
         ]);
 
-        $balance = Balance::first();
+        $balance = Balance::where('user_id', Auth::id())->first();
         if (!$balance) {
             $balance = Balance::create([
+                'user_id' => Auth::id(),
                 'current_balance' => 0,
                 'total_to_pay' => 0,
                 'total_to_receive' => 0
