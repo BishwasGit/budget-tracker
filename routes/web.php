@@ -7,6 +7,7 @@ use App\Http\Controllers\PersonController;
 use App\Http\Controllers\ExpenseController;
 use App\Http\Controllers\GoalController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\BackupController;
 
 // Authentication routes
 Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
@@ -53,4 +54,9 @@ Route::middleware('auth')->group(function () {
     Route::delete('/goals/{goal}', [GoalController::class, 'destroy'])->name('goals.destroy');
     Route::post('/goals/{goal}/allocate', [GoalController::class, 'allocate'])->name('goals.allocate');
     Route::post('/goals/{goal}/withdraw', [GoalController::class, 'withdraw'])->name('goals.withdraw');
+
+    // Backup routes
+    Route::get('/backup', [BackupController::class, 'index'])->name('backup.index');
+    Route::get('/backup/export/json', [BackupController::class, 'exportJson'])->name('backup.export.json');
+    Route::get('/backup/export/csv', [BackupController::class, 'exportCsv'])->name('backup.export.csv');
 });

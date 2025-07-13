@@ -21,6 +21,7 @@
                         <a href="{{ route('expenses.index') }}" class="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium">Expenses</a>
                         <a href="{{ route('goals.index') }}" class="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium">Goals</a>
                         <a href="{{ route('people.index') }}" class="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium">People</a>
+                        <a href="{{ route('backup.index') }}" class="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium">Backup</a>
 
                         <!-- User dropdown -->
                         <div class="relative" x-data="{ open: false }">
