@@ -57,6 +57,7 @@ Route::middleware('auth')->group(function () {
 
     // Backup routes
     Route::get('/backup', [BackupController::class, 'index'])->name('backup.index');
-    Route::get('/backup/export/json', [BackupController::class, 'exportJson'])->name('backup.export.json');
-    Route::get('/backup/export/csv', [BackupController::class, 'exportCsv'])->name('backup.export.csv');
+    Route::get('/backup/download', [BackupController::class, 'download'])->name('backup.download');
+    Route::get('/backup/download/csv', [BackupController::class, 'downloadCsv'])->name('backup.download.csv');
+    Route::get('/backup/download/sql', [BackupController::class, 'downloadSql'])->name('backup.download.sql');
 });
